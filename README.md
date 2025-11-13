@@ -1,16 +1,20 @@
-# React + Vite
+# Instagram Rewind Cards
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Transform your Instagram group chat data into shareable visual summaries**
 
-Currently, two official plugins are available:
+This web app takes your Instagram chat statistics (in JSON format) and generates stunning, social media-ready cards that showcase your group's messaging activity throughout the year. Perfect for creating end-of-year recaps or nostalgia posts.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Key Features:
+* **Upload & Analyze:** Simply drag and drop your Instagram chat stats JSON file
+* **Beautiful Visualizations:** Generate elegant cards with gradient backgrounds and modern UI
+* **Comprehensive Stats:** View total messages, longest streaks, busiest days, top chatters, engagement patterns, and response rhythms
+* **Social-Ready:** Cards are designed to be screenshot-friendly and perfect for sharing on social media
+* **Interactive Dashboard:** Clean, intuitive interface with smooth animations and responsive design
 
-## React Compiler
+### What You Get:
+* **Overview Card:** Total messages, longest streak, busiest day of the week
+* **Top Chatters:** Ranked list of most active group members with message counts
+* **Engagement Card:** Peak activity hours and messaging patterns
+* **Rhythm & Replies:** Response time analysis and conversation flow metrics
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*Built with React, Vite, and Tailwind CSS for a smooth, modern experience that turns your chat data into memorable visual stories.*

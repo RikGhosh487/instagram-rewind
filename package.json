@@ -1,7 +1,7 @@
 {
   "name": "ig-rewind",
-  "private": true,
-  "version": "0.0.0",
+  "homepage": "https://rikghosh487.github.io/instagram-rewind/",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -26,6 +26,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "gh-pages": "^6.3.0",
     "globals": "^16.5.0",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.0",

@@ -1,101 +1,11 @@
-// Validate if a JSON object is a raw Instagram message file
-const isInstagramMessageFile = (data) => {
-  return (
-    data &&
-    typeof data === "object" &&
-    Array.isArray(data.participants) &&
-    Array.isArray(data.messages) &&
-    typeof data.title === "string" &&
-    data.participants.length > 0 &&
-    data.participants.every((p) => p.name) &&
-    data.messages.every((m) => m.sender_name && m.timestamp_ms)
-  );
-};
-
-// Validate if a JSON object is a processed stats file
-const isProcessedStatsFile = (data) => {
-  return (
-    data &&
-    typeof data === "object" &&
-    typeof data.total_messages === "number" &&
-    data.per_sender &&
-    typeof data.per_sender === "object"
-  );
-};
-
-// Check if all Instagram message files have the same participants and title
-const validateSameConversation = (instagramFiles) => {
-  if (instagramFiles.length <= 1) return true;
-
-  const firstFile = instagramFiles[0].data;
-  const firstFileParticipants = firstFile.participants
-    .map((p) => p.name)
-    .sort();
-  const firstFileTitle = firstFile.title;
-
-  for (let i = 1; i < instagramFiles.length; i++) {
-    const currentFile = instagramFiles[i].data;
-    const currentFileParticipants = currentFile.participants
-      .map((p) => p.name)
-      .sort();
-    const currentFileTitle = currentFile.title;
-
-    // Check if titles match
-    if (firstFileTitle !== currentFileTitle) {
-      return {
-        valid: false,
-        reason: "title_mismatch",
-        expected: firstFileTitle,
-        found: currentFileTitle,
-        file: instagramFiles[i].filename,
-      };
-    }
-
-    // Check if participant count matches
-    if (firstFileParticipants.length !== currentFileParticipants.length) {
-      return {
-        valid: false,
-        reason: "participant_count_mismatch",
-        expectedCount: firstFileParticipants.length,
-        foundCount: currentFileParticipants.length,
-        file: instagramFiles[i].filename,
-      };
-    }
-
-    // Check if all participant names match
-    for (let j = 0; j < firstFileParticipants.length; j++) {
-      if (firstFileParticipants[j] !== currentFileParticipants[j]) {
-        return {
-          valid: false,
-          reason: "participant_name_mismatch",
-          expected: firstFileParticipants,
-          found: currentFileParticipants,
-          file: instagramFiles[i].filename,
-        };
-      }
-    }
-  }
-
-  return { valid: true };
-};
-
-// Read and parse a single file
-const readFile = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        resolve({ filename: file.name, data });
-      } catch (err) {
-        reject(new Error(`Invalid JSON in file "${file.name}"`));
-      }
-    };
-    reader.onerror = () =>
-      reject(new Error(`Failed to read file "${file.name}"`));
-    reader.readAsText(file);
-  });
-};
+// Import modules for cleaner organization
+import { 
+  isInstagramMessageFile, 
+  isProcessedStatsFile, 
+  validateSameConversation 
+} from './validation.js';
+import { processInstagramFiles } from './messageProcessor.js';
+import { readMultipleJsonFiles } from './fileReaders.js';
 
 // Process multiple files
 export const parseMultipleFiles = async (
@@ -125,14 +35,12 @@ export const parseMultipleFiles = async (
   }
 
   try {
-    onProgress && onProgress("Reading files...");
+    onProgress && onProgress("Reading files...", 5);
 
     // Read all files
-    const fileResults = await Promise.all(
-      Array.from(files).map((file) => readFile(file))
-    );
+    const fileResults = await readMultipleJsonFiles(files);
 
-    onProgress && onProgress("Validating file formats...");
+    onProgress && onProgress("Validating file formats...", 15);
 
     // Check if all files are Instagram message files
     const instagramFiles = fileResults.filter((result) =>
@@ -176,13 +84,14 @@ export const parseMultipleFiles = async (
         );
         return;
       }
+      onProgress && onProgress("Loading processed stats...", 100);
       onSuccess(processedFiles[0].data);
       return;
     }
 
     // Handle Instagram message files
     if (instagramFiles.length > 0) {
-      onProgress && onProgress("Validating conversation consistency...");
+      onProgress && onProgress("Validating conversation consistency...", 25);
 
       // Validate that all Instagram files are from the same conversation
       const validationResult = validateSameConversation(instagramFiles);
@@ -219,17 +128,16 @@ export const parseMultipleFiles = async (
         return;
       }
 
-      onProgress && onProgress("Processing Instagram data...");
+      onProgress && onProgress("Processing Instagram data...", 40);
 
-      // For now, we'll just pass the raw files to be processed
-      // In the next step, we'll implement the actual processing logic
-      const combinedData = {
-        type: "raw_instagram",
-        files: instagramFiles,
-        fileCount: instagramFiles.length,
-      };
-
-      onSuccess(combinedData);
+      try {
+        // Process the raw Instagram files into stats format
+        const processedStats = processInstagramFiles(instagramFiles, onProgress);
+        onProgress && onProgress("Finalizing data...", 100);
+        onSuccess(processedStats);
+      } catch (error) {
+        onError(`Error processing Instagram data: ${error.message}`);
+      }
       return;
     }
 

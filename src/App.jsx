@@ -18,32 +18,32 @@ export default function App() {
   const [variant] = useState("compact"); // "compact" or "story"
   const [processing, setProcessing] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [progressMessage, setProgressMessage] = useState("");
+  const [progressPercent, setProgressPercent] = useState(0);
 
-  const onProgress = (message) => {
-    // Could be used to show progress messages to user
-    console.log("Progress:", message);
+  const onProgress = (message, percent = null) => {
+    console.log("Progress:", message, percent ? `${percent}%` : "");
+    setProgressMessage(message);
+    if (percent !== null) {
+      setProgressPercent(percent);
+    }
   };
 
   const onSuccess = (data) => {
     setProcessing(false);
+    setProgressMessage("");
+    setProgressPercent(0);
     setUploadedFiles([]);
 
-    // Check if this is raw Instagram data that needs processing
-    if (data.type === "raw_instagram") {
-      setError(
-        "Raw Instagram processing not yet implemented. " +
-          "Please upload a processed stats JSON file for now."
-      );
-      return;
-    }
-
-    // Handle processed stats data
+    // All data should now be processed into stats format
     setStats(data);
     setError("");
   };
 
   const onError = (errorMessage) => {
     setProcessing(false);
+    setProgressMessage("");
+    setProgressPercent(0);
     setUploadedFiles([]);
     setError(errorMessage);
   };
@@ -68,6 +68,31 @@ export default function App() {
     handleFileDrop(event, onSuccess, onError, onProgress);
   };
 
+  const handleExportStats = () => {
+    if (!stats) return;
+
+    const exportData = {
+      ...stats,
+      export_info: {
+        exported_at: new Date().toISOString(),
+        export_version: "1.0",
+        source: "Instagram Rewind App"
+      }
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `instagram-rewind-${stats.rewind_year || new Date().getFullYear()}-stats.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (!stats) {
     return (
       <FileUpload
@@ -77,6 +102,8 @@ export default function App() {
         onDragOver={handleDragOver}
         processing={processing}
         uploadedFiles={uploadedFiles}
+        progressMessage={progressMessage}
+        progressPercent={progressPercent}
       />
     );
   }
@@ -98,7 +125,7 @@ export default function App() {
       <div className="max-w-2xl mx-auto grid grid-cols-1 gap-6">
         <div className="text-center text-white/90 mb-2">
           <h2 className="text-2xl md:text-3xl font-semibold text-white">
-            Instagram Rewind
+            Instagram Rewind {stats.rewind_year || new Date().getFullYear()}
           </h2>
           <p className="opacity-80 text-sm mb-4">
             Shareable cards for your group chat rewind
@@ -118,6 +145,15 @@ export default function App() {
               }
             >
               Upload New File
+            </button>
+            <button
+              onClick={handleExportStats}
+              className={
+                "px-4 py-2 rounded-lg text-sm bg-white/10 " +
+                "text-slate-400 hover:text-white transition-colors "
+              }
+            >
+              Export Stats JSON
             </button>
           </div>
         </div>

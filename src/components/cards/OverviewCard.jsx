@@ -14,7 +14,7 @@ function OverviewCard({ data, variant }) {
 
   return (
     <Wrapper
-      title="Your Year in Chat"
+      title={`Your ${data.rewind_year || new Date().getFullYear()} in Chat`}
       icon={<Crown className="w-6 h-6 text-white" />}
       variant={variant}
       cardRef={cardRef}

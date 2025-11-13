@@ -7,6 +7,8 @@ function FileUpload({
   onDragOver,
   processing = false,
   uploadedFiles = [],
+  progressMessage = "",
+  progressPercent = 0,
 }) {
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
@@ -67,7 +69,32 @@ function FileUpload({
           {processing && (
             <div className="text-blue-400">
               <p className="font-medium">Processing files...</p>
-              <p className="text-sm mt-2">Analyzing your Instagram data</p>
+              
+              {/* Progress bar */}
+              {progressPercent > 0 && (
+                <div className="w-full bg-slate-700 rounded-full h-2 mt-3 mb-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${Math.min(progressPercent, 100)}%` }}
+                  />
+                </div>
+              )}
+              
+              {/* Progress message */}
+              {progressMessage && (
+                <p className="text-sm mt-2 text-blue-300">{progressMessage}</p>
+              )}
+              
+              {!progressMessage && (
+                <p className="text-sm mt-2">Analyzing your Instagram data</p>
+              )}
+              
+              {/* Percentage indicator */}
+              {progressPercent > 0 && (
+                <p className="text-xs mt-1 text-slate-400">
+                  {Math.min(progressPercent, 100)}% complete
+                </p>
+              )}
             </div>
           )}
 
@@ -100,6 +127,7 @@ function FileUpload({
               • Raw Instagram message files (message_1.json, message_2.json,
               etc.)
             </li>
+            <li>• Exported stats JSON (downloaded from this app)</li>
             <li>• Pre-processed stats JSON (from previous versions)</li>
           </ul>
         </div>

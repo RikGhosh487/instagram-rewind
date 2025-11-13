@@ -55,26 +55,40 @@ function RhythmRepliesCard({ data, variant }) {
               activity (24h)
             </div>
             <div className="flex gap-0.5 justify-between">
-              {hours.map((h) => {
-                const activityLevel = data.hourly_activity
-                  ? data.hourly_activity[h]
-                  : 0;
-                const height = Math.max(10, activityLevel); // minimum height
-                return (
-                  <div
-                    key={h}
-                    className={
-                      "w-3 h-10 rounded bg-white/10 overflow-hidden"
-                    }
-                    title={`${h}:00 - ${activityLevel}% activity`}
-                  >
+              {(() => {
+                // Calculate the maximum activity to normalize the data
+                const maxActivity = data.hourly_activity
+                  ? Math.max(...data.hourly_activity)
+                  : 1; // Prevent division by zero
+                
+                return hours.map((h) => {
+                  const rawActivityCount = data.hourly_activity
+                    ? data.hourly_activity[h]
+                    : 0;
+                  
+                  // Normalize to percentage (0-100) based on max activity
+                  const activityPercentage = maxActivity > 0 
+                    ? Math.round((rawActivityCount / maxActivity) * 100)
+                    : 0;
+                  
+                  const height = Math.max(10, activityPercentage); // minimum height 10%
+                  
+                  return (
                     <div
-                      className="w-full rounded bg-white/70"
-                      style={{ height: `${height}%` }}
-                    />
-                  </div>
-                );
-              })}
+                      key={h}
+                      className={
+                        "w-3 h-10 rounded bg-white/10 overflow-hidden"
+                      }
+                      title={`${h}:00 - ${rawActivityCount} messages (${activityPercentage}% of peak)`}
+                    >
+                      <div
+                        className="w-full rounded bg-white/70"
+                        style={{ height: `${height}%` }}
+                      />
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>

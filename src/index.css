@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: rgb(203,213,225); /* tailwind slate-300 */
+  }
+  body {
+    background-color: rgb(2,6,23); /* tailwind slate-950 */
+    color: rgb(248,250,252); /* tailwind slate-50 */
+  }
+}

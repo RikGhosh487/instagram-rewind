@@ -126,6 +126,93 @@ function FileUpload({
           {error && <p className="text-red-400 mt-4">{error}</p>}
         </div>
 
+        {/* Instructions for getting Instagram data */}
+        <div className={
+          "mt-6 p-4 bg-blue-950/20 border border-blue-500/30 " +
+          "rounded-lg text-sm text-slate-300"
+        }>
+          <h3 className="font-semibold text-blue-400 mb-3 flex items-center">
+            <svg 
+              className="w-4 h-4 mr-2" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+              />
+            </svg>
+            How to get your Instagram message files:
+          </h3>
+          <ol className="space-y-2 text-xs leading-relaxed">
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">1.</span>
+              <span>
+                Go to{" "}
+                <a 
+                  href="https://accountscenter.instagram.com/?theme=dark&entry_point=app_settings"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 underline"
+                >
+                  Instagram Accounts Center
+                </a>
+              </span>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">2.</span>
+              <span>Click on "Your information and permissions"</span>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">3.</span>
+              <span>Select "Export your information"</span>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">4.</span>
+              <span>Click "Create export" → "Export to device"</span>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">5.</span>
+              <div>
+                <span className="block mb-1">Customize your export:</span>
+                <ul className="ml-4 space-y-1 text-slate-400">
+                  <li>• Information: Select only "Messages"</li>
+                  <li>• Date range: Jan 1, 2025 - [current date] (or your preferred year)</li>
+                  <li>• Format: <strong className="text-white">JSON</strong> (required)</li>
+                  <li>• Media quality: Lower quality (saves space)</li>
+                </ul>
+              </div>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">6.</span>
+              <span>
+                Wait for the export to be ready (usually a few minutes), 
+                then download the ZIP file
+              </span>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">7.</span>
+              <span>
+                Extract the ZIP and navigate to:
+                <br />
+                <code className="bg-slate-700 px-1 rounded text-xs block mt-1">
+                  [unzipped]/messages/inbox/[chat]/
+                </code>
+              </span>
+            </li>
+            <li className="flex">
+              <span className="font-medium text-blue-400 mr-2">8.</span>
+              <span>
+                Upload all message_*.json files from that folder 
+                (message_1.json, message_2.json, etc.)
+              </span>
+            </li>
+          </ol>
+        </div>
+
         <div className={
           "mt-6 p-4 bg-slate-800/30 rounded-lg text-xs " +
           "text-slate-400"

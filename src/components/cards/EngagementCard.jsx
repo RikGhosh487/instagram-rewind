@@ -26,8 +26,6 @@ function EngagementCard({ data, variant }) {
         .map(([name, count]) => ({ name, count }))
     : [];
 
-  const topDomains = data.top_domains || [];
-
   const textEmojis = data.emoji_in_text
     ? Object.entries(data.emoji_in_text)
         .sort(([, a], [, b]) => b - a)
@@ -122,27 +120,6 @@ function EngagementCard({ data, variant }) {
             </div>
           </div>
 
-          {topDomains.length > 0 ? (
-            <>
-              <h5 className="text-slate-300 text-xs mb-2">
-                Top external domains
-              </h5>
-              <div>
-                {topDomains.slice(0, 3).map((d) => (
-                  <Row key={d[0]} label={d[0]} value={`x${d[1]}`} />
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-2">
-              <div className="text-slate-400 text-sm">
-                All shared content was from Instagram
-              </div>
-              <div className="text-slate-400 text-xs mt-1">
-                No external domains to show
-              </div>
-            </div>
-          )}
           {textEmojis.length > 0 ? (
             <>
               <h5 className="text-slate-300 text-xs mb-2">

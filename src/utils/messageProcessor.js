@@ -76,6 +76,8 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   const dailyActivity = {}; // YYYY-MM-DD -> message count
   const duoCounts = {};
   const replyTimes = {};
+  const lastMessageTime = {}; // Track last message time per sender
+  const longestGaps = {}; // Track longest gap between messages per sender
   
   const totalMessages = currentYearMessages.length;
 
@@ -198,6 +200,16 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
         duoCounts[duo] = (duoCounts[duo] || 0) + 1;
       }
     }
+
+    // Track longest gap between messages for each sender (ghost mode)
+    if (lastMessageTime[sender]) {
+      const gapMinutes = (message.timestamp_ms - lastMessageTime[sender]) / 
+        (1000 * 60);
+      if (!longestGaps[sender] || gapMinutes > longestGaps[sender]) {
+        longestGaps[sender] = gapMinutes;
+      }
+    }
+    lastMessageTime[sender] = message.timestamp_ms;
   });
 
   if (onProgress) {
@@ -275,6 +287,14 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
       stats.reply_times_median[sender] = Math.round(median);
     }
   });
+
+  // Find the person with the longest gap (ghost mode)
+  const ghostMode = Object.entries(longestGaps)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 1)
+    .map(([name, gapMinutes]) => [name, gapMinutes]);
+  
+  stats.ghost_mode = ghostMode.length > 0 ? ghostMode[0] : null;
 
   if (onProgress) {
     onProgress("Processing complete!", 95);

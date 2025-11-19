@@ -14,7 +14,9 @@ function OverviewCard({ data, variant }) {
 
   return (
     <Wrapper
-      title={`Your ${data.rewind_year || new Date().getFullYear()} in Chat`}
+      title={`${
+        data.chat_title || "Chat"
+      } ${data.rewind_year || new Date().getFullYear()}`}
       icon={<Crown className="w-6 h-6 text-white" />}
       variant={variant}
       cardRef={cardRef}
@@ -60,8 +62,8 @@ function OverviewCard({ data, variant }) {
             <div className="text-white/80 text-sm">busiest day</div>
           </div>
         </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {topChatters.slice(0, 5).map((p, i) => (
+        <div className="mt-8 flex flex-wrap gap-2">
+          {topChatters.map((p, i) => (
             <Badge
               key={p.name}
               className={

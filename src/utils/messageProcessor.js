@@ -10,10 +10,15 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   // Combine all messages from all files
   let allMessages = [];
   let participants = [];
+  let chatTitle = "Chat"; // Default fallback
   
   instagramFiles.forEach(file => {
     if (participants.length === 0) {
       participants = file.data.participants.map(p => p.name);
+    }
+    // Get the chat title from the first file
+    if (file.data.title && chatTitle === "Chat") {
+      chatTitle = file.data.title;
     }
     allMessages = allMessages.concat(file.data.messages);
   });
@@ -54,7 +59,8 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     best_duo: [],
     longest_streak_days: 0,
     reply_times_median: {},
-    rewind_year: currentYear // Add the year to the stats
+    rewind_year: currentYear, // Add the year to the stats
+    chat_title: chatTitle // Add the chat title
   };
 
   // Initialize per-sender stats

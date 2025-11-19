@@ -5,6 +5,7 @@ import {
   TopChattersCard,
   EngagementCard,
   RhythmRepliesCard,
+  ReplyCard,
 } from "./components/cards";
 import {
   handleFileUpload,
@@ -136,6 +137,7 @@ export default function App() {
   const cards = [
     <OverviewCard key="ov" data={stats} variant={variant} />,
     <TopChattersCard key="tc" data={stats} variant={variant} />,
+    <ReplyCard key="rc" data={stats} variant={variant} />,
     <EngagementCard key="eg" data={stats} variant={variant} />,
     <RhythmRepliesCard key="rr" data={stats} variant={variant} />,
   ];

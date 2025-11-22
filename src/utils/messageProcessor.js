@@ -51,6 +51,22 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     reactions_received: {},
     top_reaction_emoji: {},
     emoji_in_text: {},
+    per_sender_emoji_usage: {}, // Track emoji usage per person
+    message_types: {
+      text: 0,
+      photos: 0,
+      videos: 0,
+      audio: 0,
+      shares: 0,
+      other: 0
+    },
+    milestones: {
+      first_message: null,
+      milestone_100: null,
+      milestone_500: null,
+      busiest_week: { start: null, count: 0 },
+      active_days: 0
+    },
     reels_total: 0,
     top_domains: [],
     busiest_dow: [],
@@ -59,9 +75,9 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     best_duo: [],
     longest_streak_days: 0,
     reply_times_median: {},
-    rewind_year: currentYear, // Add the year to the stats
-    chat_title: chatTitle, // Add the chat title
-    most_reacted_message: null // Track message with most reactions
+    rewind_year: currentYear,
+    chat_title: chatTitle,
+    most_reacted_message: null
   };
 
   // Initialize per-sender stats
@@ -70,6 +86,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     stats.reactions_sent[name] = 0;
     stats.reactions_received[name] = 0;
     stats.reply_times_median[name] = 0;
+    stats.per_sender_emoji_usage[name] = {};
   });
 
   // Process each message (using filtered messages)
@@ -79,6 +96,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   const replyTimes = {};
   const lastMessageTime = {}; // Track last message time per sender
   const longestGaps = {}; // Track longest gap between messages per sender
+  const weeklyActivity = {}; // Week key -> message count
   
   const totalMessages = currentYearMessages.length;
 
@@ -101,17 +119,49 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     // Count total messages
     stats.total_messages++;
     stats.per_sender[sender]++;
+    
+    // Categorize message type
+    if (message.photos && message.photos.length > 0) {
+      stats.message_types.photos++;
+    } else if (message.videos && message.videos.length > 0) {
+      stats.message_types.videos++;
+    } else if (message.audio_files && message.audio_files.length > 0) {
+      stats.message_types.audio++;
+    } else if (message.share) {
+      stats.message_types.shares++;
+    } else if (message.content && typeof message.content === "string") {
+      stats.message_types.text++;
+    } else {
+      stats.message_types.other++;
+    }
 
     // Process timestamp
     const date = new Date(message.timestamp_ms);
     const hour = date.getHours();
     const dateStr = date.toISOString().split("T")[0];
+    
+    // Track milestones
+    if (!stats.milestones.first_message) {
+      stats.milestones.first_message = message.timestamp_ms;
+    }
+    if (stats.total_messages === 100) {
+      stats.milestones.milestone_100 = message.timestamp_ms;
+    }
+    if (stats.total_messages === 500) {
+      stats.milestones.milestone_500 = message.timestamp_ms;
+    }
 
     // Hourly activity
     stats.hourly_activity[hour]++;
 
     // Daily activity for streaks
     dailyActivity[dateStr] = (dailyActivity[dateStr] || 0) + 1;
+    
+    // Weekly activity for busiest week
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - date.getDay());
+    const weekKey = weekStart.toISOString().split("T")[0];
+    weeklyActivity[weekKey] = (weeklyActivity[weekKey] || 0) + 1;
 
     // Process reactions received by this message
     if (message.reactions) {
@@ -178,6 +228,11 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
       if (emojis) {
         emojis.forEach(emoji => {
           stats.emoji_in_text[emoji] = (stats.emoji_in_text[emoji] || 0) + 1;
+          // Track per sender
+          if (!stats.per_sender_emoji_usage[sender][emoji]) {
+            stats.per_sender_emoji_usage[sender][emoji] = 0;
+          }
+          stats.per_sender_emoji_usage[sender][emoji]++;
         });
       }
       
@@ -334,6 +389,19 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     .map(([name, gapMinutes]) => [name, gapMinutes]);
   
   stats.ghost_mode = ghostMode.length > 0 ? ghostMode[0] : null;
+  
+  // Calculate busiest week
+  const busiestWeekEntry = Object.entries(weeklyActivity)
+    .sort(([,a], [,b]) => b - a)[0];
+  if (busiestWeekEntry) {
+    stats.milestones.busiest_week = {
+      start: new Date(busiestWeekEntry[0]).getTime(),
+      count: busiestWeekEntry[1]
+    };
+  }
+  
+  // Calculate active days
+  stats.milestones.active_days = Object.keys(dailyActivity).length;
 
   if (onProgress) {
     onProgress("Processing complete!", 95);

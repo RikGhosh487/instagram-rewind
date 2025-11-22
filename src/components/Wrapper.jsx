@@ -9,7 +9,7 @@ function Wrapper({ children, title, icon, cardRef }) {
         scale: 2,
         backgroundColor: null,
         width: 480,
-        height: 700,
+        height: 730,
       });
 
       const link = document.createElement("a");
@@ -24,7 +24,7 @@ function Wrapper({ children, title, icon, cardRef }) {
     <Card
       ref={cardRef}
       className={
-        "relative w-full max-w-[480px] min-h-[700px] mx-auto " +
+        "relative w-full max-w-[480px] min-h-[730px] mx-auto " +
         "overflow-hidden rounded-3xl border-0 shadow-xl " +
         "bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700"
       }
@@ -43,7 +43,7 @@ function Wrapper({ children, title, icon, cardRef }) {
           }
         />
       </div>
-      <div className="flex h-full min-h-[700px] flex-col p-8 md:p-10">
+      <div className="flex h-full min-h-[730px] flex-col p-8 md:p-10">
         <header className="mb-4">
           <div className="flex items-center gap-2">
             <div

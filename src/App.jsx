@@ -4,7 +4,7 @@ import {
   OverviewCard,
   TopChattersCard,
   EngagementCard,
-  RhythmRepliesCard,
+  RhythmCard,
   ReplyCard,
 } from "./components/cards";
 import {
@@ -138,7 +138,7 @@ export default function App() {
     <TopChattersCard key="tc" data={stats} />,
     <ReplyCard key="rc" data={stats} />,
     <EngagementCard key="eg" data={stats} />,
-    <RhythmRepliesCard key="rr" data={stats} />,
+    <RhythmCard key="rr" data={stats} />,
   ];
 
   return (

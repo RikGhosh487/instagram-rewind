@@ -97,6 +97,8 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   const lastMessageTime = {}; // Track last message time per sender
   const longestGaps = {}; // Track longest gap between messages per sender
   const weeklyActivity = {}; // Week key -> message count
+  let weekendMessages = 0;
+  let weekdayMessages = 0;
   
   const totalMessages = currentYearMessages.length;
 
@@ -139,6 +141,14 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     const date = new Date(message.timestamp_ms);
     const hour = date.getHours();
     const dateStr = date.toISOString().split("T")[0];
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+    
+    // Track weekend vs weekday
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      weekendMessages++;
+    } else {
+      weekdayMessages++;
+    }
     
     // Track milestones
     if (!stats.milestones.first_message) {
@@ -402,6 +412,21 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   
   // Calculate active days
   stats.milestones.active_days = Object.keys(dailyActivity).length;
+  
+  // Calculate burstiness (coefficient of variation for daily activity)
+  const dailyCounts = Object.values(dailyActivity);
+  if (dailyCounts.length > 1) {
+    const mean = dailyCounts.reduce((sum, val) => sum + val, 0) / dailyCounts.length;
+    const variance = dailyCounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / dailyCounts.length;
+    const stdDev = Math.sqrt(variance);
+    stats.burstiness_coefficient = mean > 0 ? stdDev / mean : 0;
+  } else {
+    stats.burstiness_coefficient = 0;
+  }
+  
+  // Add weekend vs weekday stats
+  stats.weekend_messages = weekendMessages;
+  stats.weekday_messages = weekdayMessages;
 
   if (onProgress) {
     onProgress("Processing complete!", 95);

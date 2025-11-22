@@ -3,7 +3,7 @@ import { Clock3, Zap } from "lucide-react";
 import Wrapper from "../Wrapper";
 import Row from "../Row";
 
-function RhythmCard({ data }) {
+function RhythmCard({ data, isStoriesMode = false }) {
   const cardRef = useRef(null);
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const fastestResponders = data.reply_times_median
@@ -33,6 +33,7 @@ function RhythmCard({ data }) {
       title="Rhythm"
       icon={<Clock3 className="w-6 h-6 text-white" />}
       cardRef={cardRef}
+      isStoriesMode={isStoriesMode}
     >
       <div className="grid grid-cols-1 gap-4">
         {/* Tempo */}

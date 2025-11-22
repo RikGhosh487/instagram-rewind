@@ -2,7 +2,7 @@ import { Download, Flame } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import html2canvas from "html2canvas";
 
-function Wrapper({ children, title, icon, cardRef }) {
+function Wrapper({ children, title, icon, cardRef, isStoriesMode = false }) {
   const downloadCard = async () => {
     if (cardRef?.current) {
       const canvas = await html2canvas(cardRef.current, {
@@ -83,16 +83,18 @@ function Wrapper({ children, title, icon, cardRef }) {
             <Flame className="w-4 h-4" />
             <span>Generated locally</span>
           </div>
-          <button
-            onClick={downloadCard}
-            className={
-              "flex items-center gap-2 px-3 py-1 rounded-lg " +
-              "bg-white/15 hover:bg-white/25 transition-colors " +
-              "text-white text-xs backdrop-blur-sm"
-            }
-          >
-            <Download className="w-3 h-3" /> Download
-          </button>
+          {!isStoriesMode && (
+            <button
+              onClick={downloadCard}
+              className={
+                "flex items-center gap-2 px-3 py-1 rounded-lg " +
+                "bg-white/15 hover:bg-white/25 transition-colors " +
+                "text-white text-xs backdrop-blur-sm"
+              }
+            >
+              <Download className="w-3 h-3" /> Download
+            </button>
+          )}
         </footer>
       </div>
     </Card>

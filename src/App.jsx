@@ -134,11 +134,11 @@ export default function App() {
   }
 
   const cards = [
-    <OverviewCard key="ov" data={stats} />,
-    <TopChattersCard key="tc" data={stats} />,
-    <ReplyCard key="rc" data={stats} />,
-    <EngagementCard key="eg" data={stats} />,
-    <RhythmCard key="rr" data={stats} />,
+    <OverviewCard key="ov" data={stats} isStoriesMode={isStoriesMode} />,
+    <TopChattersCard key="tc" data={stats} isStoriesMode={isStoriesMode} />,
+    <ReplyCard key="rc" data={stats} isStoriesMode={isStoriesMode} />,
+    <EngagementCard key="eg" data={stats} isStoriesMode={isStoriesMode} />,
+    <RhythmCard key="rr" data={stats} isStoriesMode={isStoriesMode} />,
   ];
 
   return (

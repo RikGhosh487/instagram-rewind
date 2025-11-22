@@ -3,7 +3,7 @@ import { MessageCircle, Timer, Users } from "lucide-react";
 import Wrapper from "../Wrapper";
 import Row from "../Row";
 
-function ReplyCard({ data }) {
+function ReplyCard({ data, isStoriesMode = false }) {
   const cardRef = useRef(null);
   
   const formatTime = (minutes) => {
@@ -39,6 +39,7 @@ function ReplyCard({ data }) {
       title="Replies"
       icon={<MessageCircle className="w-6 h-6 text-white" />}
       cardRef={cardRef}
+      isStoriesMode={isStoriesMode}
     >
       <div className="grid grid-cols-1 gap-4">
         {/* Response Times Ranking */}

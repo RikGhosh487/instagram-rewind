@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Users, Heart } from "lucide-react";
 import Wrapper from "../Wrapper";
 
-function TopChattersCard({ data }) {
+function TopChattersCard({ data, isStoriesMode = false }) {
   const cardRef = useRef(null);
   const topChatters = data.per_sender
     ? Object.entries(data.per_sender)
@@ -23,6 +23,7 @@ function TopChattersCard({ data }) {
       title="Top Chatters"
       icon={<Users className="w-6 h-6 text-white" />}
       cardRef={cardRef}
+      isStoriesMode={isStoriesMode}
     >
       <ol className="mt-1 space-y-3">
         {topChatters.map((p, i) => (

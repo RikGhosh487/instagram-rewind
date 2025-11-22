@@ -15,7 +15,7 @@ import {
 import { Badge } from "../ui/badge";
 import Wrapper from "../Wrapper";
 
-function OverviewCard({ data }) {
+function OverviewCard({ data, isStoriesMode = false }) {
   const cardRef = useRef(null);
   const topChatters = data.per_sender
     ? Object.entries(data.per_sender)
@@ -33,6 +33,7 @@ function OverviewCard({ data }) {
       }`}
       icon={<Crown className="w-6 h-6 text-white" />}
       cardRef={cardRef}
+      isStoriesMode={isStoriesMode}
     >
       <div className="grid grid-cols-1 gap-4">
         <div className="text-4xl md:text-5xl font-extrabold tracking-tight">

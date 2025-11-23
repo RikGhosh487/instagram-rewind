@@ -14,11 +14,11 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   
   instagramFiles.forEach(file => {
     if (participants.length === 0) {
-      participants = file.data.participants.map(p => p.name);
+      participants = file.data.participants.map(p => decodeInstagramEmoji(p.name));
     }
     // Get the chat title from the first file
     if (file.data.title && chatTitle === "Chat") {
-      chatTitle = file.data.title;
+      chatTitle = decodeInstagramEmoji(file.data.title);
     }
     allMessages = allMessages.concat(file.data.messages);
   });
@@ -143,7 +143,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
       );
     }
 
-    const sender = message.sender_name;
+    const sender = decodeInstagramEmoji(message.sender_name);
     // Skip if sender not in participants
     if (!participants.includes(sender)) return;
 
@@ -212,7 +212,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
       const reactionCount = message.reactions.length;
       
       message.reactions.forEach(reaction => {
-        const reactor = reaction.actor;
+        const reactor = decodeInstagramEmoji(reaction.actor);
         if (participants.includes(reactor)) {
           stats.reactions_sent[reactor]++;
           stats.reactions_received[sender]++;
@@ -341,7 +341,8 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     // Calculate reply times (simplified - time between consecutive messages)
     if (index > 0) {
       const prevMessage = currentYearMessages[index - 1];
-      if (prevMessage.sender_name !== sender) {
+      const prevSenderName = decodeInstagramEmoji(prevMessage.sender_name);
+      if (prevSenderName !== sender) {
         // minutes
         const timeDiff = (message.timestamp_ms - prevMessage.timestamp_ms) / 
           (1000 * 60);
@@ -352,7 +353,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
         
         // Track your personal reply times
         if (accountOwner && sender === accountOwner) {
-          const respondingTo = prevMessage.sender_name;
+          const respondingTo = prevSenderName;
           if (!yourReplyTimes[respondingTo]) {
             yourReplyTimes[respondingTo] = [];
           }
@@ -362,8 +363,8 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
         }
         
         // Track back-and-forth messages (for best friend calculation)
-        if (accountOwner && (sender === accountOwner || prevMessage.sender_name === accountOwner)) {
-          const otherPerson = sender === accountOwner ? prevMessage.sender_name : sender;
+        if (accountOwner && (sender === accountOwner || prevSenderName === accountOwner)) {
+          const otherPerson = sender === accountOwner ? prevSenderName : sender;
           if (!messagesWithEachPerson[otherPerson]) {
             messagesWithEachPerson[otherPerson] = 0;
           }
@@ -374,7 +375,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
 
     // Duo counting (simplified - consecutive message pairs)
     if (index > 0) {
-      const prevSender = currentYearMessages[index - 1].sender_name;
+      const prevSender = decodeInstagramEmoji(currentYearMessages[index - 1].sender_name);
       if (prevSender !== sender) {
         const duo = [prevSender, sender].sort().join("|");
         duoCounts[duo] = (duoCounts[duo] || 0) + 1;

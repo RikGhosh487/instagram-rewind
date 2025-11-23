@@ -5,17 +5,44 @@ import html2canvas from "html2canvas";
 function Wrapper({ children, title, icon, cardRef, isStoriesMode = false }) {
   const downloadCard = async () => {
     if (cardRef?.current) {
+      // Hide the download button before capturing
+      const downloadButton = cardRef.current.querySelector('button');
+      if (downloadButton) {
+        downloadButton.style.display = 'none';
+      }
+
+      // Create a temporary style override for backdrop-blur elements
+      const styleEl = document.createElement('style');
+      styleEl.id = 'temp-download-style';
+      styleEl.textContent = `
+        .backdrop-blur-sm {
+          backdrop-filter: none !important;
+          background-color: rgba(255, 255, 255, 0.15) !important;
+        }
+      `;
+      document.head.appendChild(styleEl);
+
+      // Wait a moment for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 50));
+
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         backgroundColor: null,
-        width: 480,
-        height: 730,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
       });
+
+      // Remove temporary style and show button again
+      document.getElementById('temp-download-style')?.remove();
+      if (downloadButton) {
+        downloadButton.style.display = '';
+      }
 
       const link = document.createElement("a");
       link.download = 
         `${title.toLowerCase().replace(/\s+/g, "_")}_card.png`;
-      link.href = canvas.toDataURL();
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     }
   };
@@ -29,19 +56,19 @@ function Wrapper({ children, title, icon, cardRef, isStoriesMode = false }) {
         "bg-gradient-to-br from-purple-900 via-pink-800 to-orange-700"
       }
     >
-      <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div
-          className={
-            "absolute -top-24 -left-24 w-[380px] h-[380px] " +
-            "rounded-full bg-pink-500/30 blur-3xl"
-          }
-        />
-        <div
-          className={
-            "absolute -bottom-24 -right-24 w-[380px] h-[380px] " +
-            "rounded-full bg-orange-500/30 blur-3xl"
-          }
-        />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+        <svg className="absolute inset-0 w-full h-full">
+          <defs>
+            <filter id="blur-pink" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
+            </filter>
+            <filter id="blur-orange" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
+            </filter>
+          </defs>
+          <circle cx="96" cy="96" r="190" fill="rgba(236, 72, 153, 0.3)" filter="url(#blur-pink)" />
+          <circle cx="384" cy="634" r="190" fill="rgba(249, 115, 22, 0.3)" filter="url(#blur-orange)" />
+        </svg>
       </div>
       <div className="flex h-full min-h-[730px] flex-col p-8 md:p-10">
         <header className="mb-4">

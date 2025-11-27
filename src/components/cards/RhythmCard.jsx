@@ -21,13 +21,13 @@ function RhythmCard({ data, isStoriesMode = false }) {
 
   const busiestDay = data.busiest_dow?.[0]
     ? [
+        "Sunday",
         "Monday",
         "Tuesday",
         "Wednesday",
         "Thursday",
         "Friday",
         "Saturday",
-        "Sunday",
       ][data.busiest_dow[0][0]]
     : "—";
   const busiestHour = data.busiest_hour?.[0]

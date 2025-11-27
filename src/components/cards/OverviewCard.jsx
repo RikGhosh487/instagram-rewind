@@ -63,13 +63,13 @@ function OverviewCard({ data, isStoriesMode = false }) {
             <div className="text-2xl font-bold">
               {data.busiest_dow?.[0]
                 ? [
+                    "Sun",
                     "Mon",
                     "Tue",
                     "Wed",
                     "Thu",
                     "Fri",
                     "Sat",
-                    "Sun",
                   ][data.busiest_dow[0][0]]
                 : "—"}
             </div>

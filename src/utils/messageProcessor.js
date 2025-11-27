@@ -2,7 +2,8 @@
 import { 
   decodeInstagramEmoji, 
   isExternalDomain, 
-  filterMessagesByYear 
+  filterMessagesByYear,
+  getRewindYear
 } from "./instagramUtils.js";
 
 // Process raw Instagram message files into stats format
@@ -27,8 +28,9 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
   allMessages.sort((a, b) => a.timestamp_ms - b.timestamp_ms);
 
   // Filter messages for current year only
-  const currentYear = new Date().getFullYear();
-  const currentYearMessages = filterMessagesByYear(allMessages);
+  // Determine which year to use for the rewind (previous year through March)
+  const rewindYear = getRewindYear();
+  const currentYearMessages = filterMessagesByYear(allMessages, rewindYear);
 
   // Check if we have any messages for the current year
   if (currentYearMessages.length === 0) {
@@ -88,7 +90,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     best_duo: [],
     longest_streak_days: 0,
     reply_times_median: {},
-    rewind_year: currentYear,
+    rewind_year: rewindYear,
     chat_title: chatTitle,
     most_reacted_message: null,
     account_owner: accountOwner,
@@ -146,6 +148,20 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
     const sender = decodeInstagramEmoji(message.sender_name);
     // Skip if sender not in participants
     if (!participants.includes(sender)) return;
+
+    // Skip reaction notification messages (these are already captured in reactions array)
+    // Examples: "liked a message", "loved a message", "reacted ❤ to your message"
+    if (message.content && typeof message.content === "string") {
+      if (message.content.includes(" liked a message") ||
+          message.content.includes(" loved a message") ||
+          message.content.includes(" reacted ") ||
+          message.content.includes(" laughed at a message") ||
+          message.content.includes(" emphasized a message") ||
+          message.content.includes(" questioned a message") ||
+          message.content.includes(" disliked a message")) {
+        return; // Skip this notification message entirely
+      }
+    }
 
     // Count total messages
     stats.total_messages++;

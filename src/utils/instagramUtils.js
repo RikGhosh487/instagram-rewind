@@ -49,11 +49,24 @@ export const isExternalDomain = (domain) => {
 };
 
 // Filter messages to current year only
-export const filterMessagesByYear = (messages) => {
-  const currentYear = new Date().getFullYear();
-  const yearStart = new Date(currentYear, 0, 1).getTime();
-  const yearEnd = new Date(currentYear + 1, 0, 1).getTime();
-  
+// Determine which year should be used for the rewind.
+// By default, use the current year, but keep showing the previous
+// calendar year through the end of March (i.e. Jan-Mar still show last year).
+export const getRewindYear = (referenceDate = new Date()) => {
+  const month = referenceDate.getMonth(); // 0 = Jan, 11 = Dec
+  const year = referenceDate.getFullYear();
+  // If we're in Jan/Feb/Mar (months 0,1,2), use the previous year
+  return month <= 2 ? year - 1 : year;
+};
+
+// Filter messages to a specific year. If `targetYear` is not provided,
+// it will be derived from `getRewindYear()` so the app shows the previous
+// year through March and switches after that.
+export const filterMessagesByYear = (messages, targetYear = null) => {
+  const year = targetYear !== null ? targetYear : getRewindYear();
+  const yearStart = new Date(year, 0, 1).getTime();
+  const yearEnd = new Date(year + 1, 0, 1).getTime();
+
   return messages.filter(message => 
     message.timestamp_ms >= yearStart && message.timestamp_ms < yearEnd
   );

@@ -1,49 +1,85 @@
-import { Download, Flame } from "lucide-react";
+import { Download, Flame, Share2 } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import html2canvas from "html2canvas";
 
 function Wrapper({ children, title, icon, cardRef, isStoriesMode = false }) {
+  const captureCard = async () => {
+    if (!cardRef?.current) return null;
+
+    // Hide buttons before capturing
+    const buttons = cardRef.current.querySelectorAll('button');
+    buttons.forEach(btn => btn.style.display = 'none');
+
+    // Create a temporary style override for backdrop-blur elements
+    const styleEl = document.createElement('style');
+    styleEl.id = 'temp-download-style';
+    styleEl.textContent = `
+      .backdrop-blur-sm {
+        backdrop-filter: none !important;
+        background-color: rgba(255, 255, 255, 0.15) !important;
+      }
+    `;
+    document.head.appendChild(styleEl);
+
+    // Wait a moment for styles to apply
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    const canvas = await html2canvas(cardRef.current, {
+      scale: 2,
+      backgroundColor: null,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+    });
+
+    // Remove temporary style and show buttons again
+    document.getElementById('temp-download-style')?.remove();
+    buttons.forEach(btn => btn.style.display = '');
+
+    return canvas;
+  };
+
   const downloadCard = async () => {
-    if (cardRef?.current) {
-      // Hide the download button before capturing
-      const downloadButton = cardRef.current.querySelector('button');
-      if (downloadButton) {
-        downloadButton.style.display = 'none';
+    const canvas = await captureCard();
+    if (!canvas) return;
+
+    const link = document.createElement("a");
+    link.download = 
+      `${title.toLowerCase().replace(/\s+/g, "_")}_card.png`;
+    link.href = canvas.toDataURL('image/png', 1.0);
+    link.click();
+  };
+
+  const shareCard = async () => {
+    try {
+      const canvas = await captureCard();
+      if (!canvas) return;
+
+      // Convert canvas to blob
+      const blob = await new Promise(resolve => 
+        canvas.toBlob(resolve, 'image/png', 1.0)
+      );
+
+      const fileName = `${title.toLowerCase().replace(/\s+/g, "_")}_card.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      // Check if Web Share API is available and supports files
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `${title} - IG Unreeled`,
+          text: 'Check out my Instagram chat stats! 📊',
+        });
+      } else {
+        // Fallback: just download the file
+        downloadCard();
       }
-
-      // Create a temporary style override for backdrop-blur elements
-      const styleEl = document.createElement('style');
-      styleEl.id = 'temp-download-style';
-      styleEl.textContent = `
-        .backdrop-blur-sm {
-          backdrop-filter: none !important;
-          background-color: rgba(255, 255, 255, 0.15) !important;
-        }
-      `;
-      document.head.appendChild(styleEl);
-
-      // Wait a moment for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-      });
-
-      // Remove temporary style and show button again
-      document.getElementById('temp-download-style')?.remove();
-      if (downloadButton) {
-        downloadButton.style.display = '';
+    } catch (error) {
+      // User cancelled or error occurred, fallback to download
+      if (error.name !== 'AbortError') {
+        console.log('Share failed, downloading instead');
+        downloadCard();
       }
-
-      const link = document.createElement("a");
-      link.download = 
-        `${title.toLowerCase().replace(/\s+/g, "_")}_card.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      link.click();
     }
   };
 
@@ -111,16 +147,30 @@ function Wrapper({ children, title, icon, cardRef, isStoriesMode = false }) {
             <span>Generated locally</span>
           </div>
           {!isStoriesMode && (
-            <button
-              onClick={downloadCard}
-              className={
-                "flex items-center gap-2 px-3 py-1 rounded-lg " +
-                "bg-white/15 hover:bg-white/25 transition-colors " +
-                "text-white text-xs backdrop-blur-sm"
-              }
-            >
-              <Download className="w-3 h-3" /> Download
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={shareCard}
+                className={
+                  "flex items-center gap-2 px-3 py-1 rounded-lg " +
+                  "bg-white/15 hover:bg-white/25 transition-colors " +
+                  "text-white text-xs backdrop-blur-sm"
+                }
+                aria-label="Share card"
+              >
+                <Share2 className="w-3 h-3" /> Share
+              </button>
+              <button
+                onClick={downloadCard}
+                className={
+                  "flex items-center gap-2 px-3 py-1 rounded-lg " +
+                  "bg-white/15 hover:bg-white/25 transition-colors " +
+                  "text-white text-xs backdrop-blur-sm"
+                }
+                aria-label="Download card"
+              >
+                <Download className="w-3 h-3" /> Download
+              </button>
+            </div>
           )}
         </footer>
       </div>

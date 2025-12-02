@@ -151,6 +151,7 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
 
     // Skip reaction notification messages (these are already captured in reactions array)
     // Examples: "liked a message", "loved a message", "reacted ❤ to your message"
+    // Also skip call-related messages (audio calls, video chats)
     if (message.content && typeof message.content === "string") {
       if (message.content.includes(" liked a message") ||
           message.content.includes(" loved a message") ||
@@ -158,7 +159,13 @@ export const processInstagramFiles = (instagramFiles, onProgress = null) => {
           message.content.includes(" laughed at a message") ||
           message.content.includes(" emphasized a message") ||
           message.content.includes(" questioned a message") ||
-          message.content.includes(" disliked a message")) {
+          message.content.includes(" disliked a message") ||
+          message.content.includes("Audio call ended") ||
+          message.content.includes("started an audio call") ||
+          message.content.includes("Video chat ended") ||
+          message.content.includes("started a video chat") ||
+          message.content.includes("missed an audio call") ||
+          message.content.includes("missed a video chat")) {
         return; // Skip this notification message entirely
       }
     }
